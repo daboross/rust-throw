@@ -1,0 +1,4 @@
+[package]
+name = "throw"
+version = "0.1.0"
+authors = ["Dabo Ross <daboross@daboross.net>"]
