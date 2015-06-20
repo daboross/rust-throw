@@ -3,9 +3,7 @@ extern crate throw;
 
 
 fn throw_static_message() -> Result<(), throw::Error<&'static str>> {
-    throw!("hi");
-
-    Ok(())
+    throw_new!("hi");
 }
 
 fn throw1() -> Result<(), throw::Error<()>> {
@@ -51,9 +49,9 @@ fn test_multiple_throws() {
     let error = throw3().unwrap_err();
     assert_eq!(error.original_error(), &());
     assert_eq!(format!("{:?}", error), "Error: ()\
-    \n\tat 21:4 in lib (tests/lib.rs)\
-    \n\tat 16:4 in lib (tests/lib.rs)\
-    \n\tat 12:4 in lib (tests/lib.rs)");
+    \n\tat 19:4 in lib (tests/lib.rs)\
+    \n\tat 14:4 in lib (tests/lib.rs)\
+    \n\tat 10:4 in lib (tests/lib.rs)");
 }
 
 #[test]
@@ -66,5 +64,5 @@ fn test_returns_ok() {
 fn test_mod_throw() {
     let error = mod_test::throws().unwrap_err();
     assert_eq!(format!("{}", error), "Error: ahhhh\
-    \n\tat 38:8 in lib::mod_test (tests/lib.rs)");
+    \n\tat 36:8 in lib::mod_test (tests/lib.rs)");
 }

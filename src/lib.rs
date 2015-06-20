@@ -103,9 +103,9 @@
 //!    at 6:8 in main (src/main.rs)
 //! ```
 //!
-//! `throw!()` can also be used in place of `throw_new!()` *if the argument provided is &str or
-//! String. `throw!()` is special cased so that if you provide it a string literal rather than a
-//! Result, it will throw the string literal directly.
+//! `throw_new!()` differs from `throw!()` in that it takes a parameter directly to pass to a
+//! `throw::Error`, rather than a `Result<>` to match on. `throw_new!()` will always return
+//! directly from the function.
 
 use std::fmt;
 
@@ -178,67 +178,12 @@ impl <E> From<E> for Error<E> {
     }
 }
 
-/// Represents a behavior of what to do when throw!() is used with a type. This is implemented to
-/// start with on Result<>, &str and String. When throw!() is used, ThrowBehavior::handle_throw()
-/// is called on the expr passed. E represents the type of error stored in the Error<> portion of
-/// the Result.
-pub trait ThrowBehavior<E> {
-    /// Represents the type stored in the Ok portion of the Result.
-    type OkType;
-
-    /// Turns this type into a Result in a manner appropriate with throw!().
-    fn handle_throw(self) -> Result<Self::OkType, Error<E>>;
-}
-
-impl<T, OE, NE> ThrowBehavior<NE> for Result<T, OE> where OE: Into<Error<NE>> {
-    type OkType = T;
-
-    fn handle_throw(self) -> Result<T, Error<NE>> {
-        match self {
-            Ok(x) => Ok(x),
-            Err(e) => {
-                Err(e.into())
-            }
-        }
-    }
-}
-
-impl<'a, E> ThrowBehavior<E> for &'a str where &'a str: Into<E> {
-    type OkType = ();
-
-    fn handle_throw(self) -> Result<(), Error<E>> {
-        Err(Error {
-            points: Vec::new(),
-            original_error: self.into(),
-        })
-    }
-}
-
-impl<E> ThrowBehavior<E> for String where String: Into<E> {
-    type OkType = ();
-
-    fn handle_throw(self) -> Result<(), Error<E>> {
-        Err(Error {
-            points: Vec::new(),
-            original_error: self.into(),
-        })
-    }
-}
-
 #[macro_export]
 macro_rules! throw {
     ($e:expr) => (
-        match $crate::ThrowBehavior::handle_throw($e) {
+        match $e {
             Ok(v) => v,
-            Err(mut e) => {
-                e.__push_point($crate::ErrorPoint {
-                    line: line!(),
-                    column: column!(),
-                    module: module_path!(),
-                    file: file!(),
-                });
-                return Err(e);
-            },
+            Err(e) => throw_new!(e),
         }
     )
 }
