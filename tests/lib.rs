@@ -31,6 +31,14 @@ fn throws_ok() -> Result<&'static str, throw::Error<&'static str>> {
     Ok(ok_msg)
 }
 
+mod mod_test {
+    use throw;
+
+    pub fn throws() -> Result<(), throw::Error<&'static str>> {
+        throw_new!("ahhhh");
+    }
+}
+
 #[test]
 fn test_static_message() {
     let error = throw_static_message().unwrap_err();
@@ -52,4 +60,11 @@ fn test_multiple_throws() {
 fn test_returns_ok() {
     let ok = throws_ok().unwrap();
     assert_eq!(ok, "ok");
+}
+
+#[test]
+fn test_mod_throw() {
+    let error = mod_test::throws().unwrap_err();
+    assert_eq!(format!("{}", error), "Error: ahhhh\
+    \n\tat 38:8 in lib::mod_test (tests/lib.rs)");
 }
