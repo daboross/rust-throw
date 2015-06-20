@@ -2,3 +2,11 @@
 name = "throw"
 version = "0.1.0"
 authors = ["Dabo Ross <daboross@daboross.net>"]
+description = "Throw is an extension of error handling in rust which adds statically produced stack traces"
+
+documentation = "https://dabo.guru/rust/throw/"
+repository = "https://github.com/daboross/rust-throw/"
+
+readme = "README.md"
+keywords = ["throw", "error", "catch", "result"]
+license = "MIT"
