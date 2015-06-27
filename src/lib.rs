@@ -12,7 +12,7 @@
 //! time you propagate the error upwards with `up!()`.
 //!
 //! *Throw does not replace existing error handling systems*. The `throw::Error` type has a type
-//! parameter `E` which represents an internal error type stored. `throw::Error` just warps your
+//! parameter `E` which represents an internal error type stored. `throw::Error` just wraps your
 //! error type and stores ErrorPoints alongside it.
 //!
 //! Throw helps you better keep track of your errors. Instead of seeing a generic "No such file or
