@@ -3,4 +3,7 @@ sudo: false
 rust:
 - stable
 - beta
-- nightly
+matrix:
+    include:
+    - rust: nightly
+      after_script: cargo bench --verbose

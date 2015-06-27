@@ -1,6 +1,6 @@
 [package]
 name = "throw"
-version = "0.1.0"
+version = "0.1.1-dev"
 authors = ["Dabo Ross <daboross@daboross.net>"]
 description = "Throw is an extension of error handling in rust which adds statically produced stack traces"
 

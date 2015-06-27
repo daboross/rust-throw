@@ -270,6 +270,7 @@ macro_rules! up {
         }
     );
 }
+
 #[macro_export]
 macro_rules! throw {
     ($e:expr) => (
