@@ -7,26 +7,31 @@ extern crate throw;
 
 use test::Bencher;
 
+#[inline(never)]
 fn gives_throw_ok() -> Result<&'static str, throw::Error<&'static str>> {
     test::black_box(Ok("ok"))
 }
 
+#[inline(never)]
 fn gives_ok() -> Result<&'static str, &'static str> {
     test::black_box(Ok("ok"))
 }
 
+#[inline(never)]
 fn throws_up_ok() -> Result<&'static str, throw::Error<&'static str>> {
-    let ok_msg = up!(gives_throw_ok());
+    let ok_msg = test::black_box(up!(gives_throw_ok()));
     Ok(ok_msg)
 }
 
+#[inline(never)]
 fn throws_throw_ok() -> Result<&'static str, throw::Error<&'static str>> {
-    let ok_msg = throw!(gives_ok());
+    let ok_msg = test::black_box(throw!(gives_ok()));
     Ok(ok_msg)
 }
 
+#[inline(never)]
 fn throws_try_ok() -> Result<&'static str, &'static str> {
-    let ok_msg = try!(gives_ok());
+    let ok_msg = test::black_box(try!(gives_ok()));
     Ok(ok_msg)
 }
 
