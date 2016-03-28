@@ -216,6 +216,12 @@ impl<E> Error<E> {
     pub fn original_error(&self) -> &E {
         &self.original_error
     }
+    
+    /// Move the original error out.
+    #[inline]
+    pub fn into_origin(self) -> E {
+        self.original_error
+    }
 
     /// Transforms this Error<OldError> into Error<NewError>. This isn't implemented as an Into or
     /// From implementation because it would conflict with the blanket implementations in stdlib.
