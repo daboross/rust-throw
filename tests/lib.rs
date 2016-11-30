@@ -53,9 +53,11 @@ fn test_static_message() {
 }
 
 #[test]
+#[allow(deprecated)]
 fn test_multiple_throws() {
     let error = throw3().unwrap_err();
     assert_eq!(error.err(), &());
+    assert_eq!(error.err(), error.original_error());
     assert_eq!(format!("{:?}", error), "Error: ()\
     \n\tat 21:4 in lib (tests/lib.rs)\
     \n\tat 16:4 in lib (tests/lib.rs)\

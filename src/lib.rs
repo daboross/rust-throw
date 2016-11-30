@@ -215,9 +215,23 @@ impl<E> Error<E> {
     }
 
     /// Gets the original error which this Error was constructed with.
+    #[deprecated="use `err` instead."]
+    #[inline]
+    pub fn original_error(&self) -> &E {
+        self.err()
+    }
+
+    /// Gets the original error which this Error was constructed with.
     #[inline]
     pub fn err(&self) -> &E {
         &self.err
+    }
+
+    /// Move the original error out.
+    #[deprecated="use `into_err` instead."]
+    #[inline]
+    pub fn into_origin(self) -> E {
+        self.into_err()
     }
 
     /// transform the inner err to expected err.
