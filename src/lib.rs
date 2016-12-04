@@ -171,8 +171,11 @@ impl ErrorPoint {
     }
 
     #[doc(hidden)]
-    pub fn __construct(line: u32, column: u32, module_path: &'static str, file: &'static str)
-            -> ErrorPoint {
+    pub fn __construct(line: u32,
+                       column: u32,
+                       module_path: &'static str,
+                       file: &'static str)
+                       -> ErrorPoint {
         ErrorPoint {
             line: line,
             column: column,
@@ -186,15 +189,15 @@ impl ErrorPoint {
 /// which the error was propagated.
 pub struct Error<E> {
     points: Vec<ErrorPoint>,
-    original_error: E,
+    err: E,
 }
 
 impl<E> Error<E> {
     /// Creates a new Error with no ErrorPoints
-    pub fn new(error: E) -> Error<E> {
+    pub fn new(err: E) -> Error<E> {
         Error {
             points: Vec::new(),
-            original_error: error,
+            err: err,
         }
     }
 
@@ -212,45 +215,75 @@ impl<E> Error<E> {
     }
 
     /// Gets the original error which this Error was constructed with.
+    #[deprecated="use `err` instead."]
     #[inline]
     pub fn original_error(&self) -> &E {
-        &self.original_error
+        self.err()
     }
-    
+
+    /// Gets the original error which this Error was constructed with.
+    #[inline]
+    pub fn err(&self) -> &E {
+        &self.err
+    }
+
     /// Move the original error out.
+    #[deprecated="use `into_err` instead."]
     #[inline]
     pub fn into_origin(self) -> E {
-        self.original_error
+        self.into_err()
+    }
+
+    /// transform the inner err to expected err.
+    #[inline]
+    pub fn into_err<N>(self) -> N
+        where E: Into<N>
+    {
+        self.err.into()
     }
 
     /// Transforms this Error<OldError> into Error<NewError>. This isn't implemented as an Into or
     /// From implementation because it would conflict with the blanket implementations in stdlib.
-    pub fn transform<NE>(self) -> Error<NE> where E: Into<NE> {
+    pub fn transform<NE>(self) -> Error<NE>
+        where E: Into<NE>
+    {
         Error {
             points: self.points,
-            original_error: self.original_error.into(),
+            err: self.err.into(),
         }
     }
 }
 
-impl<E> fmt::Display for Error<E> where E: fmt::Display {
+impl<E> fmt::Display for Error<E>
+    where E: fmt::Display
+{
     fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
-        try!(write!(fmt, "Error: {}", self.original_error));
+        try!(write!(fmt, "Error: {}", self.err));
         for point in self.points.iter().rev() {
-            try!(write!(fmt, "\n\tat {}:{} in {} ({})", point.line(), point.column(),
-                point.module_path(), point.file()));
+            try!(write!(fmt,
+                        "\n\tat {}:{} in {} ({})",
+                        point.line(),
+                        point.column(),
+                        point.module_path(),
+                        point.file()));
         }
 
         Ok(())
     }
 }
 
-impl<E> fmt::Debug for Error<E> where E: fmt::Debug {
+impl<E> fmt::Debug for Error<E>
+    where E: fmt::Debug
+{
     fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
-        try!(write!(fmt, "Error: {:?}", self.original_error));
+        try!(write!(fmt, "Error: {:?}", self.err));
         for point in self.points.iter().rev() {
-            try!(write!(fmt, "\n\tat {}:{} in {} ({})", point.line(), point.column(),
-                point.module_path(), point.file()));
+            try!(write!(fmt,
+                        "\n\tat {}:{} in {} ({})",
+                        point.line(),
+                        point.column(),
+                        point.module_path(),
+                        point.file()));
         }
 
         Ok(())
@@ -264,17 +297,24 @@ macro_rules! up {
             Ok(v) => v,
             Err(e) => {
                 // re-assignment for a better error message if up!() is used incorrectly
-                let mut e: $crate::Error<_> = e.transform();
-                e.__push_point($crate::ErrorPoint::__construct(
-                    line!(),
-                    column!(),
-                    module_path!(),
-                    file!(),
-                ));
-                return Err(e);
+                return as_err!(e.transform());
             },
         }
     );
+}
+
+#[macro_export]
+macro_rules! as_err {
+    ($e:expr) => ({
+        let mut e = $e;
+        e.__push_point($crate::ErrorPoint::__construct(
+            line!(),
+            column!(),
+            module_path!(),
+            file!(),
+        ));
+        Err(e)
+    })
 }
 
 #[macro_export]
@@ -290,13 +330,6 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! throw_new {
     ($e:expr) => ({
-        let mut e: $crate::Error<_> = $crate::Error::new($e.into());
-        e.__push_point($crate::ErrorPoint::__construct(
-            line!(),
-            column!(),
-            module_path!(),
-            file!(),
-        ));
-        return Err(e);
+        return as_err!($crate::Error::new($e.into()));
     })
 }

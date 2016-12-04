@@ -1,43 +1,45 @@
 #[macro_use]
 extern crate throw;
 
+use throw::Result;
 
-fn throw_static_message() -> Result<(), throw::Error<&'static str>> {
+
+fn throw_static_message() -> Result<(), &'static str> {
     throw_new!("hi");
 }
 
-fn throw1() -> Result<(), throw::Error<()>> {
+fn throw1() -> Result<(), ()> {
     throw_new!(());
 }
 
-fn throw2() -> Result<(), throw::Error<()>> {
+fn throw2() -> Result<(), ()> {
     up!(throw1());
     Ok(())
 }
 
-fn throw3() -> Result<(), throw::Error<()>> {
+fn throw3() -> Result<(), ()> {
     up!(throw2());
     Ok(())
 }
 
-fn gives_ok() -> Result<&'static str, throw::Error<&'static str>> {
+fn gives_ok() -> Result<&'static str, &'static str> {
     Ok("ok")
 }
 
-fn throws_ok() -> Result<&'static str, throw::Error<&'static str>> {
+fn throws_ok() -> Result<&'static str, &'static str> {
     let ok_msg = up!(gives_ok());
     Ok(ok_msg)
 }
 
 mod mod_test {
-    use throw;
+    use throw::Result;
 
-    pub fn throws() -> Result<(), throw::Error<&'static str>> {
+    pub fn throws() -> Result<(), &'static str> {
         throw_new!("ahhhh");
     }
 }
 
-fn throws_into() -> Result<(), throw::Error<String>> {
+fn throws_into() -> Result<(), String> {
     throw!(Err("some static string"));
     Ok(())
 }
@@ -45,18 +47,21 @@ fn throws_into() -> Result<(), throw::Error<String>> {
 #[test]
 fn test_static_message() {
     let error = throw_static_message().unwrap_err();
-    assert_eq!(*error.original_error(), "hi");
-    assert_eq!(error.to_string(), "Error: hi\n\tat 6:4 in lib (tests/lib.rs)");
+    assert_eq!(*error.err(), "hi");
+    assert_eq!(error.to_string(), "Error: hi\n\tat 8:4 in lib (tests/lib.rs)");
+    assert_eq!("hi".to_owned(), error.into_err::<String>());
 }
 
 #[test]
+#[allow(deprecated)]
 fn test_multiple_throws() {
     let error = throw3().unwrap_err();
-    assert_eq!(error.original_error(), &());
+    assert_eq!(error.err(), &());
+    assert_eq!(error.err(), error.original_error());
     assert_eq!(format!("{:?}", error), "Error: ()\
-    \n\tat 19:4 in lib (tests/lib.rs)\
-    \n\tat 14:4 in lib (tests/lib.rs)\
-    \n\tat 10:4 in lib (tests/lib.rs)");
+    \n\tat 21:4 in lib (tests/lib.rs)\
+    \n\tat 16:4 in lib (tests/lib.rs)\
+    \n\tat 12:4 in lib (tests/lib.rs)");
 }
 
 #[test]
@@ -69,12 +74,12 @@ fn test_returns_ok() {
 fn test_mod_throw() {
     let error = mod_test::throws().unwrap_err();
     assert_eq!(error.to_string(), "Error: ahhhh\
-    \n\tat 36:8 in lib::mod_test (tests/lib.rs)");
+    \n\tat 38:8 in lib::mod_test (tests/lib.rs)");
 }
 
 #[test]
 fn test_throws_into() {
     let error = throws_into().unwrap_err();
     assert_eq!(error.to_string(), "Error: some static string\
-    \n\tat 41:4 in lib (tests/lib.rs)")
+    \n\tat 43:4 in lib (tests/lib.rs)")
 }
