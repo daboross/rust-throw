@@ -74,9 +74,9 @@
 //! #       /*
 //!         panic!("{}", e);
 //! #       */
-//! #       assert_eq!(format!("{}", e), "Error: No such file or directory (os error 2)\
-//! #       \n\tat 16:23 in rust_out (<anon>)\
-//! #       \n\tat 9:19 in rust_out (<anon>)");
+//! #       let err = e.to_string();
+//! #       assert!(err.starts_with("Error: No such file or directory (os error 2)\
+//! #       \n\tat 16:23 in rust_out (") && err.find(")\n\tat 9:19 in rust_out (").is_some());
 //!     }
 //! }
 //! ```
@@ -118,8 +118,8 @@
 //! #   /*
 //!     possibly_fails().unwrap()
 //! #   */
-//! #   assert_eq!(format!("{}", possibly_fails().unwrap_err()), "Error: oops\
-//! #   \n\tat 6:8 in rust_out (<anon>)")
+//! #   assert!(possibly_fails().unwrap_err().to_string().starts_with("Error: oops\
+//! #   \n\tat 6:8 in rust_out ("))
 //! }
 //! ```
 //!
