@@ -10,3 +10,6 @@ repository = "https://github.com/daboross/rust-throw/"
 readme = "README.md"
 keywords = ["throw", "error", "catch", "result"]
 license = "MIT"
+
+[dev-dependencies]
+regex = "0.2"
