@@ -60,8 +60,11 @@ fn throws_into() -> Result<(), String> {
 fn test_static_message() {
     let error = throw_static_message().unwrap_err();
     assert_eq!(*error.err(), "hi");
-    assert_matches!(r#"Error: hi
-    at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#, error);
+    assert_matches!(
+        r#"Error: hi
+    at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#,
+        error
+    );
     assert_eq!("hi".to_owned(), error.into_err::<String>());
 }
 

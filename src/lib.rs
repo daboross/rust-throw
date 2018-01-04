@@ -171,11 +171,12 @@ impl ErrorPoint {
     }
 
     #[doc(hidden)]
-    pub fn __construct(line: u32,
-                       column: u32,
-                       module_path: &'static str,
-                       file: &'static str)
-                       -> ErrorPoint {
+    pub fn __construct(
+        line: u32,
+        column: u32,
+        module_path: &'static str,
+        file: &'static str,
+    ) -> ErrorPoint {
         ErrorPoint {
             line: line,
             column: column,
@@ -215,7 +216,7 @@ impl<E> Error<E> {
     }
 
     /// Gets the original error which this Error was constructed with.
-    #[deprecated="use `err` instead."]
+    #[deprecated = "use `err` instead."]
     #[inline]
     pub fn original_error(&self) -> &E {
         self.err()
@@ -228,7 +229,7 @@ impl<E> Error<E> {
     }
 
     /// Move the original error out.
-    #[deprecated="use `into_err` instead."]
+    #[deprecated = "use `into_err` instead."]
     #[inline]
     pub fn into_origin(self) -> E {
         self.into_err()
@@ -237,7 +238,8 @@ impl<E> Error<E> {
     /// transform the inner err to expected err.
     #[inline]
     pub fn into_err<N>(self) -> N
-        where E: Into<N>
+    where
+        E: Into<N>,
     {
         self.err.into()
     }
@@ -245,7 +247,8 @@ impl<E> Error<E> {
     /// Transforms this Error<OldError> into Error<NewError>. This isn't implemented as an Into or
     /// From implementation because it would conflict with the blanket implementations in stdlib.
     pub fn transform<NE>(self) -> Error<NE>
-        where E: Into<NE>
+    where
+        E: Into<NE>,
     {
         Error {
             points: self.points,
@@ -255,17 +258,20 @@ impl<E> Error<E> {
 }
 
 impl<E> fmt::Display for Error<E>
-    where E: fmt::Display
+where
+    E: fmt::Display,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
         try!(write!(fmt, "Error: {}", self.err));
         for point in self.points.iter().rev() {
-            try!(write!(fmt,
-                        "\n\tat {}:{} in {} ({})",
-                        point.line(),
-                        point.column(),
-                        point.module_path(),
-                        point.file()));
+            try!(write!(
+                fmt,
+                "\n\tat {}:{} in {} ({})",
+                point.line(),
+                point.column(),
+                point.module_path(),
+                point.file()
+            ));
         }
 
         Ok(())
@@ -273,17 +279,20 @@ impl<E> fmt::Display for Error<E>
 }
 
 impl<E> fmt::Debug for Error<E>
-    where E: fmt::Debug
+where
+    E: fmt::Debug,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
         try!(write!(fmt, "Error: {:?}", self.err));
         for point in self.points.iter().rev() {
-            try!(write!(fmt,
-                        "\n\tat {}:{} in {} ({})",
-                        point.line(),
-                        point.column(),
-                        point.module_path(),
-                        point.file()));
+            try!(write!(
+                fmt,
+                "\n\tat {}:{} in {} ({})",
+                point.line(),
+                point.column(),
+                point.module_path(),
+                point.file()
+            ));
         }
 
         Ok(())

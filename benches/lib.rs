@@ -7,7 +7,7 @@ extern crate throw;
 
 use test::Bencher;
 use throw::Result;
-use std::result::{Result as StdResult};
+use std::result::Result as StdResult;
 
 #[inline(never)]
 fn gives_throw_ok() -> Result<&'static str, &'static str> {
@@ -39,21 +39,15 @@ fn throws_try_ok() -> StdResult<&'static str, &'static str> {
 
 #[bench]
 fn bench_throw_ok_return(bench: &mut Bencher) {
-    bench.iter(|| {
-        throws_throw_ok()
-    })
+    bench.iter(|| throws_throw_ok())
 }
 
 #[bench]
 fn bench_up_ok_return(bench: &mut Bencher) {
-    bench.iter(|| {
-        throws_up_ok()
-    })
+    bench.iter(|| throws_up_ok())
 }
 
 #[bench]
 fn bench_try_ok_return(bench: &mut Bencher) {
-    bench.iter(|| {
-        throws_try_ok()
-    })
+    bench.iter(|| throws_try_ok())
 }
