@@ -1,5 +1,5 @@
 #![deny(missing_docs)]
-#![doc(html_root_url = "https://dabo.guru/rust/throw/throw/")]
+#![doc(html_root_url = "https://docs.rs/throw/0.1.1")]
 //! Throw!
 //! ------
 //!

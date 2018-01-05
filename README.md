@@ -1,28 +1,37 @@
 Throw!
 ------
+[![Travis CI status][travis-image]][travis-builds]
+[![crates.io version badge][cratesio-badge]][crates-io-page]
 
-Throw is a new experimental rust error handling library, meant to assist and build on existing
-error handling systems.
+Efficient, statically-calculated backtraces wrapping any error type.
+
+Documentation: https://docs.rs/throw
+
+Throw does not replace existing error handling systems: instead, it simply provides a
+`throw::Error<E>` type which wraps your error and provides additional context.
 
 Throw exports two structs, `throw::ErrorPoint` and `throw::Error`. `throw::Error` stores a
 single `original_error` variable which it is created from, and then a list of `ErrorPoint`s
 which starts out with the original point of creation with `throw!()`, and is added to every
 time you propagate the error upwards with `up!()`.
 
-*Throw does not replace existing error handling systems*. The `throw::Error` type has a type
-parameter `E` which represents an internal error type stored. `throw::Error` just wraps your
-error type and stores ErrorPoints alongside it.
+`throw!()` and `up!()` provide strictly less functionality than alternative crates such as
+[backtrace], but they come with the advantage of performance. Using compiler-provided macros,
+these functions embed the line number and filename they're used in into the ErrorPoint they
+construct, and build the stacktrace piece-by-piece at each point. You additionally won't get
+irrelevant stacktrace lines above where the error is handled! This may be good or bad,
+depending on your use case.
 
-Throw helps you better keep track of your errors. Instead of seeing a generic "No such file or
-directory" message, you get a stack trace of functions which propagated the error as well.
+Throw also only works if you actually use the macros- which is quite a disadvantage. [backtrace]
+is most likely what you want if you don't have a strict performance requirement.
 
-Instead of:
+Throw in practice: instead of this:
 
 ```text
 IO Error: failed to lookup address information: Name or service not known
 ```
 
-Get:
+you'll get this:
 
 ```text
 Error: IO Error: failed to lookup address information: Name or service not known
@@ -31,8 +40,8 @@ Error: IO Error: failed to lookup address information: Name or service not known
     at 28:17 in zaldinar_irclib (/home/daboross/Projects/Rust/zaldinar/zaldinar-irclib/src/lib.rs)
 ```
 
----
-
-- API Documentation, full usage instructions: https://dabo.guru/rust/throw/
-- Travis CI builds: https://travis-ci.org/daboross/rust-throw
-- Cargo crates.io page: http://crates.io/crates/throw
+[backtrace]: https://crates.io/crates/backtrace
+[crates-io-page]: https://crates.io/crates/throw
+[travis-image]: https://travis-ci.org/daboross/rust-throw.svg?branch=master
+[travis-builds]: https://travis-ci.org/daboross/rust-throw
+[cratesio-badge]: http://meritbadge.herokuapp.com/throw

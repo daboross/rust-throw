@@ -1,15 +1,19 @@
 [package]
 name = "throw"
+# Remember to update html_root_url in src/lib.rs with each version.
 version = "0.1.2-dev"
-authors = ["Dabo Ross <daboross@daboross.net>"]
-description = "Throw is an extension of error handling in rust which adds statically produced stack traces"
+authors = ["David Ross <daboross@daboross.net>"]
+description = "Efficiently add statically-calculated stack traces to errors."
 
-documentation = "https://dabo.guru/rust/throw/"
+documentation = "https://docs.rs/throw/"
 repository = "https://github.com/daboross/rust-throw/"
-
 readme = "README.md"
-keywords = ["throw", "error", "catch", "result"]
+
 license = "MIT"
+keywords = ["error"]
+categories = ["rust-patterns"]
+
+include = ["Cargo.toml", "src/**/*", "tests/**/*", "examples/**/*", "LICENSE", "README.md"]
 
 [dev-dependencies]
 regex = "0.2"
