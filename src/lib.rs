@@ -190,15 +190,15 @@ impl ErrorPoint {
 /// which the error was propagated.
 pub struct Error<E> {
     points: Vec<ErrorPoint>,
-    err: E,
+    error: E,
 }
 
 impl<E> Error<E> {
     /// Creates a new Error with no ErrorPoints
-    pub fn new(err: E) -> Error<E> {
+    pub fn new(error: E) -> Error<E> {
         Error {
             points: Vec::new(),
-            err: err,
+            error: error,
         }
     }
 
@@ -216,32 +216,32 @@ impl<E> Error<E> {
     }
 
     /// Gets the original error which this Error was constructed with.
-    #[deprecated = "use `err` instead."]
+    #[deprecated = "use `error` instead."]
     #[inline]
     pub fn original_error(&self) -> &E {
-        self.err()
+        self.error()
     }
 
     /// Gets the original error which this Error was constructed with.
     #[inline]
-    pub fn err(&self) -> &E {
-        &self.err
+    pub fn error(&self) -> &E {
+        &self.error
     }
 
     /// Move the original error out.
-    #[deprecated = "use `into_err` instead."]
     #[inline]
     pub fn into_origin(self) -> E {
-        self.into_err()
+        self.into_error()
     }
 
-    /// transform the inner err to expected err.
+    /// Take out the original error and transform into another type
+    /// where the original error can transform into that type.
     #[inline]
-    pub fn into_err<N>(self) -> N
+    pub fn into_error<N>(self) -> N
     where
         E: Into<N>,
     {
-        self.err.into()
+        self.error.into()
     }
 
     /// Transforms this Error<OldError> into Error<NewError>. This isn't implemented as an Into or
@@ -252,7 +252,7 @@ impl<E> Error<E> {
     {
         Error {
             points: self.points,
-            err: self.err.into(),
+            error: self.error.into(),
         }
     }
 }
@@ -262,7 +262,7 @@ where
     E: fmt::Display,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
-        try!(write!(fmt, "Error: {}", self.err));
+        try!(write!(fmt, "Error: {}", self.error));
         for point in self.points.iter().rev() {
             try!(write!(
                 fmt,
@@ -283,7 +283,7 @@ where
     E: fmt::Debug,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
-        try!(write!(fmt, "Error: {:?}", self.err));
+        try!(write!(fmt, "Error: {:?}", self.error));
         for point in self.points.iter().rev() {
             try!(write!(
                 fmt,
@@ -306,14 +306,15 @@ macro_rules! up {
             Ok(v) => v,
             Err(e) => {
                 // re-assignment for a better error message if up!() is used incorrectly
-                return as_err!(e.transform());
+                return Err(__with_new_errorpoint!(e.transform()));
             },
         }
     );
 }
 
+#[doc(hidden)]
 #[macro_export]
-macro_rules! as_err {
+macro_rules! __with_new_errorpoint {
     ($e:expr) => ({
         let mut e = $e;
         e.__push_point($crate::ErrorPoint::__construct(
@@ -322,7 +323,7 @@ macro_rules! as_err {
             module_path!(),
             file!(),
         ));
-        Err(e)
+        e
     })
 }
 
@@ -339,6 +340,6 @@ macro_rules! throw {
 #[macro_export]
 macro_rules! throw_new {
     ($e:expr) => ({
-        return as_err!($crate::Error::new($e.into()));
+        return Err(__with_new_errorpoint!($crate::Error::new($e.into())));
     })
 }

@@ -59,21 +59,21 @@ fn throws_into() -> Result<(), String> {
 #[test]
 fn test_static_message() {
     let error = throw_static_message().unwrap_err();
-    assert_eq!(*error.err(), "hi");
+    assert_eq!(*error.error(), "hi");
     assert_matches!(
         r#"Error: hi
     at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#,
         error
     );
-    assert_eq!("hi".to_owned(), error.into_err::<String>());
+    assert_eq!("hi".to_owned(), error.into_origin());
 }
 
 #[test]
 #[allow(deprecated)]
 fn test_multiple_throws() {
     let error = throw3().unwrap_err();
-    assert_eq!(error.err(), &());
-    assert_eq!(error.err(), error.original_error());
+    assert_eq!(error.error(), &());
+    assert_eq!(error.error(), error.original_error());
     assert_matches!(
         r#"Error: \(\)
     at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)
