@@ -15,5 +15,8 @@ categories = ["rust-patterns"]
 
 include = ["Cargo.toml", "src/**/*", "tests/**/*", "examples/**/*", "LICENSE", "README.md"]
 
+[badges]
+travis-ci = { repository = "daboross/fern" }
+
 [dev-dependencies]
 regex = "0.2"
