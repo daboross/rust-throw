@@ -15,6 +15,11 @@ categories = ["rust-patterns"]
 
 include = ["Cargo.toml", "src/**/*", "tests/**/*", "examples/**/*", "LICENSE", "README.md"]
 
+[features]
+std = []
+unlimited-points = []
+default = ["std", "unlimited-points"]
+
 [badges]
 travis-ci = { repository = "daboross/fern" }
 

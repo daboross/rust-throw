@@ -40,6 +40,14 @@ Error: IO Error: failed to lookup address information: Name or service not known
     at 28:17 in zaldinar_irclib (/home/daboross/Projects/Rust/zaldinar/zaldinar-irclib/src/lib.rs)
 ```
 
+# `no_std`
+
+`throw` supports building without std, but it will still depend on `alloc` and use `alloc::Vec`. This can be enabled when using nightly rust with `default-features = false`:
+
+```toml
+throw = { version = "0.1", default-features = false }
+```
+
 [backtrace]: https://crates.io/crates/backtrace
 [crates-io-page]: https://crates.io/crates/throw
 [travis-image]: https://travis-ci.org/daboross/rust-throw.svg?branch=master

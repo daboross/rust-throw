@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), feature(core, alloc))]
 #![deny(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/throw/0.1.2")]
 //! Throw!
@@ -131,11 +133,37 @@
 //! `throw_new!()` differs from `throw!()` in that it takes a parameter directly to pass to a
 //! `throw::Error`, rather than a `Result<>` to match on. `throw_new!()` will always return
 //! directly from the function.
+//!
+//! ---
+//!
+//! `no_std`
+//! ---
+//!
+//! Throw offers support for `no_std`, with the caveat that a dependency on `alloc` is still
+//! required for `Vec` support. (`throw` uses a Vec to store error points within an error.)
+//!
+//! To use this feature, depend on `throw` with `default-features = false`:
+//!
+//! ```toml
+//! [dependencies]
+//! throw = { version = "0.1", default-features = "false" }
+//! ```
 
-use std::fmt;
+#[cfg(feature = "std")]
+mod core {
+    pub use std::fmt;
+    pub use std::result;
+}
+
+use core::fmt;
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+#[cfg(not(feature = "std"))]
+use alloc::Vec;
 
 /// Result alias for a result containing a throw::Error.
-pub type Result<T, E> = std::result::Result<T, Error<E>>;
+pub type Result<T, E> = core::result::Result<T, Error<E>>;
 
 /// Represents a location at which an error was thrown via throw!()
 pub struct ErrorPoint {
@@ -261,7 +289,7 @@ impl<E> fmt::Display for Error<E>
 where
     E: fmt::Display,
 {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Error: {}", self.error));
         for point in self.points.iter().rev() {
             try!(write!(
@@ -282,7 +310,7 @@ impl<E> fmt::Debug for Error<E>
 where
     E: fmt::Debug,
 {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Error: {:?}", self.error));
         for point in self.points.iter().rev() {
             try!(write!(
