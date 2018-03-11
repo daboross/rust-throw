@@ -3,10 +3,10 @@ sudo: false
 rust:
 - stable
 - beta
-script:
-- cargo test --verbose
-- cargo test --no-default-features --verbose
 matrix:
     include:
     - rust: nightly
+      script:
+      - cargo test --verbose
+      - cargo test --no-default-features --verbose
       after_script: cargo bench --verbose
