@@ -21,7 +21,7 @@ unlimited-points = []
 default = ["std", "unlimited-points"]
 
 [badges]
-travis-ci = { repository = "daboross/fern" }
+travis-ci = { repository = "daboross/rust-throw" }
 
 [dev-dependencies]
 regex = "0.2"
