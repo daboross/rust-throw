@@ -158,20 +158,176 @@ mod core {
 use core::fmt;
 
 #[cfg(not(feature = "std"))]
+#[macro_use]
 extern crate alloc;
+
 #[cfg(not(feature = "std"))]
 use alloc::Vec;
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+#[cfg(not(feature = "std"))]
+use alloc::borrow::ToOwned;
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde;
+
+use serde::ser::{SerializeStruct, SerializeSeq, Serialize, Serializer};
+
+/// Types allowed to be value in the context vector
+#[derive(Debug, Clone)]
+pub enum ThrowContextValues {
+    ///Boolean
+    Bool(bool),
+    ///Int8
+    Int8(i8),
+    ///Uint8
+    Uint8(u8),
+    ///Int16
+    Int16(i16),
+    ///Uint16
+    Uint16(u16),
+    ///Int32
+    Int32(i32),
+    ///Uint32
+    Uint32(u32),
+    ///Int64
+    Int64(i64),
+    ///Uint64
+    Uint64(u64),
+    ///Float32
+    Float32(f32),
+    ///Float64
+    Float64(f64),
+    ///String
+    String(String),
+}
+
+impl Serialize for ThrowContextValues {
+    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        match self {
+            &ThrowContextValues::Bool(ref x) => { return Ok(serializer.serialize_bool(*x)?); }
+            &ThrowContextValues::Int8(ref x) => { return Ok(serializer.serialize_i8(*x)?); }
+            &ThrowContextValues::Uint8(ref x) => { return Ok(serializer.serialize_u8(*x)?); }
+            &ThrowContextValues::Int16(ref x) => { return Ok(serializer.serialize_i16(*x)?); }
+            &ThrowContextValues::Uint16(ref x) => { return Ok(serializer.serialize_u16(*x)?); }
+            &ThrowContextValues::Int32(ref x) => { return Ok(serializer.serialize_i32(*x)?); }
+            &ThrowContextValues::Uint32(ref x) => { return Ok(serializer.serialize_u32(*x)?); }
+            &ThrowContextValues::Int64(ref x) => { return Ok(serializer.serialize_i64(*x)?); }
+            &ThrowContextValues::Uint64(ref x) => { return Ok(serializer.serialize_u64(*x)?); }
+            &ThrowContextValues::Float32(ref x) => { return Ok(serializer.serialize_f32(*x)?); }
+            &ThrowContextValues::Float64(ref x) => { return Ok(serializer.serialize_f64(*x)?); }
+            &ThrowContextValues::String(ref x) => { return Ok(serializer.serialize_str(x)?); }
+        };
+    }
+}
+
+
+impl fmt::Display for ThrowContextValues {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &ThrowContextValues::Bool(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Int8(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Uint8(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Int16(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Uint16(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Int32(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Uint32(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Int64(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Uint64(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Float32(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::Float64(ref x) => { write!(f, "{}", x) }
+            &ThrowContextValues::String(ref x) => { write!(f, "{}", x) }
+        }
+    }
+}
+
+impl Into<ThrowContextValues> for u8 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Uint8(self)
+    }
+}
+
+impl Into<ThrowContextValues> for i8 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Int8(self)
+    }
+}
+
+impl Into<ThrowContextValues> for u16 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Uint16(self)
+    }
+}
+
+impl Into<ThrowContextValues> for i16 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Int16(self)
+    }
+}
+
+impl Into<ThrowContextValues> for u32 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Uint32(self)
+    }
+}
+
+impl Into<ThrowContextValues> for i32 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Int32(self)
+    }
+}
+
+impl Into<ThrowContextValues> for u64 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Uint64(self)
+    }
+}
+
+impl Into<ThrowContextValues> for i64 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Int64(self)
+    }
+}
+
+impl Into<ThrowContextValues> for f32 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Float32(self)
+    }
+}
+
+impl Into<ThrowContextValues> for f64 {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::Float64(self)
+    }
+}
+
+impl<'a> Into<ThrowContextValues> for &'a str {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::String(self.to_owned())
+    }
+}
+
+impl Into<ThrowContextValues> for String {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::String(self)
+    }
+}
 
 /// Result alias for a result containing a throw::Error.
 pub type Result<T, E> = core::result::Result<T, Error<E>>;
 
 /// Represents a location at which an error was thrown via throw!()
+#[derive(Serialize, Debug)]
 pub struct ErrorPoint {
     line: u32,
     column: u32,
     module_path: &'static str,
     file: &'static str,
 }
+
 
 impl ErrorPoint {
     /// The line throw!() occurred at, retrieved by line!()
@@ -214,20 +370,101 @@ impl ErrorPoint {
     }
 }
 
+
+/// represent a key-value pair
+#[derive(Serialize, Debug, Clone)]
+pub struct KvPair {
+    key: &'static str,
+    value: ThrowContextValues,
+}
+
+impl KvPair {
+    fn new(key: &'static str, value: ThrowContextValues) -> KvPair {
+        KvPair { key, value }
+    }
+    ///key
+    pub fn key(&self) -> &'static str {
+        self.key
+    }
+    ///value
+    pub fn value(&self) -> &ThrowContextValues {
+        &self.value
+    }
+}
+
+
 /// Represents an error. Stores an original error of type E, and any number of ErrorPoints at
 /// which the error was propagated.
 pub struct Error<E> {
     points: Vec<ErrorPoint>,
+    context: Vec<KvPair>,
     error: E,
 }
+
+struct VecErrorPoint<'a>(&'a [ErrorPoint]);
+
+impl<'a> Serialize for VecErrorPoint<'a>
+{
+    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
+        for e in self.0 {
+            seq.serialize_element(e)?;
+        }
+        seq.end()
+    }
+}
+
+struct VecKvPair<'a>(&'a [KvPair]);
+
+impl<'a> Serialize for VecKvPair<'a>
+{
+    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
+        for e in self.0 {
+            seq.serialize_element(e)?;
+        }
+        seq.end()
+    }
+}
+
+
+impl<E: fmt::Display> Serialize for Error<E> {
+    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+        where S: Serializer
+    {
+        let mut state = serializer.serialize_struct("Error", 3)?;
+
+        state.serialize_field("points", &VecErrorPoint(&self.points))?;
+        state.serialize_field("context", &VecKvPair(&self.context))?;
+        state.serialize_field::<&str>("error", &format!("{}", self.error).as_str())?;
+        state.end()
+    }
+}
+
 
 impl<E> Error<E> {
     /// Creates a new Error with no ErrorPoints
     pub fn new(error: E) -> Error<E> {
         Error {
             points: Vec::new(),
+            context: Vec::new(),
             error: error,
         }
+    }
+
+    /// get context
+    pub fn get_context(&self) -> &[KvPair] {
+        self.context.as_slice()
+    }
+
+    /// For macro use only
+    #[doc(hidden)]
+    pub fn __add_context<V: Into<ThrowContextValues>>(&mut self, key: &'static str, value: V) {
+        self.context.push(KvPair::new(key, value.into()))
     }
 
     /// For macro use only
@@ -266,8 +503,8 @@ impl<E> Error<E> {
     /// where the original error can transform into that type.
     #[inline]
     pub fn into_error<N>(self) -> N
-    where
-        E: Into<N>,
+        where
+            E: Into<N>,
     {
         self.error.into()
     }
@@ -275,22 +512,33 @@ impl<E> Error<E> {
     /// Transforms this Error<OldError> into Error<NewError>. This isn't implemented as an Into or
     /// From implementation because it would conflict with the blanket implementations in stdlib.
     pub fn transform<NE>(self) -> Error<NE>
-    where
-        E: Into<NE>,
+        where
+            E: Into<NE>,
     {
         Error {
             points: self.points,
+            context: self.context,
             error: self.error.into(),
         }
     }
 }
 
 impl<E> fmt::Display for Error<E>
-where
-    E: fmt::Display,
+    where
+        E: fmt::Display,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Error: {}", self.error));
+
+        for kv in self.context.iter().rev() {
+            try!(write!(
+                fmt,
+                "\n\t{}: {}",
+                kv.key(),
+                kv.value(),
+            ));
+        }
+
         for point in self.points.iter().rev() {
             try!(write!(
                 fmt,
@@ -307,11 +555,19 @@ where
 }
 
 impl<E> fmt::Debug for Error<E>
-where
-    E: fmt::Debug,
+    where
+        E: fmt::Debug,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Error: {:?}", self.error));
+        for kv in self.context.iter().rev() {
+            try!(write!(
+                fmt,
+                "\n\t{}: {}",
+                kv.key(),
+                kv.value(),
+            ));
+        }
         for point in self.points.iter().rev() {
             try!(write!(
                 fmt,
@@ -338,6 +594,19 @@ macro_rules! up {
             },
         }
     );
+    ($e:expr, $($key:expr, $value:expr), *) => (
+        match $e {
+            Ok(v) => v,
+            Err(e) => {
+                // re-assignment for a better error message if up!() is used incorrectly
+                let mut me = __with_new_errorpoint!(e.transform());
+                $(
+                    me.__add_context($key, $value);
+                )*
+                return Err(me);
+            },
+        }
+    )
 }
 
 #[doc(hidden)]
@@ -363,11 +632,27 @@ macro_rules! throw {
             Err(e) => throw_new!(e),
         }
     );
+
+     ($e:expr, $($key:expr, $value:expr), *) => ({
+         match $e {
+            Ok(v) => v,
+            Err(e) => throw_new!(e, $($key:expr, $value:expr)*),
+        }
+    })
 }
 
 #[macro_export]
 macro_rules! throw_new {
-    ($e:expr) => ({
+  ($e:expr) => ({
         return Err(__with_new_errorpoint!($crate::Error::new($e.into())));
+    });
+
+  ($e:expr, $($key:expr, $value:expr), *) => ({
+        let mut me = $crate::Error::new($e.into());
+        $(
+            me.__add_context($key, $value);
+        )*
+        return Err(__with_new_errorpoint!(me));
+
     })
 }

@@ -23,5 +23,10 @@ default = ["std", "unlimited-points"]
 [badges]
 travis-ci = { repository = "daboross/rust-throw" }
 
+[dependencies]
+serde={version = "1.0", default-features = false }
+serde_derive = "1.0"
+
 [dev-dependencies]
 regex = "0.2"
+serde_json = "1.0"
