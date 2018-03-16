@@ -636,7 +636,7 @@ macro_rules! throw {
      ($e:expr, $($key:expr, $value:expr), *) => ({
          match $e {
             Ok(v) => v,
-            Err(e) => throw_new!(e, $($key:expr, $value:expr)*),
+            Err(e) => throw_new!(e, $($key, $value)*),
         }
     })
 }
