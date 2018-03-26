@@ -9,4 +9,5 @@ matrix:
       script:
       - cargo test --verbose
       - cargo test --no-default-features --verbose
+      - cargo test --features serde-1
       after_script: cargo bench --verbose

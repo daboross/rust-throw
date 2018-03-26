@@ -167,15 +167,23 @@ use alloc::Vec;
 use alloc::string::String;
 #[cfg(not(feature = "std"))]
 use alloc::borrow::ToOwned;
+
 #[macro_use]
 extern crate serde_derive;
-
 extern crate serde;
 
-use serde::ser::{SerializeStruct, SerializeSeq, Serialize, Serializer};
+use serde::ser::{SerializeStruct, Serialize, Serializer};
+
+
+/// extends alloc::String type and implements serde Serialize for it, when not_std flag is used
+#[cfg(not(feature = "std"))]
+pub struct StringExt(String);
+
 
 /// Types allowed to be value in the context vector
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde-1", derive(Serialize))]
+#[cfg_attr(feature = "serde-1", serde(untagged))]
 pub enum ThrowContextValues {
     ///Boolean
     Bool(bool),
@@ -201,45 +209,26 @@ pub enum ThrowContextValues {
     Float64(f64),
     ///String
     String(String),
+    ///Static String
+    StaticStr(&'static str),
 }
-
-impl Serialize for ThrowContextValues {
-    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        match self {
-            &ThrowContextValues::Bool(ref x) => { return Ok(serializer.serialize_bool(*x)?); }
-            &ThrowContextValues::Int8(ref x) => { return Ok(serializer.serialize_i8(*x)?); }
-            &ThrowContextValues::Uint8(ref x) => { return Ok(serializer.serialize_u8(*x)?); }
-            &ThrowContextValues::Int16(ref x) => { return Ok(serializer.serialize_i16(*x)?); }
-            &ThrowContextValues::Uint16(ref x) => { return Ok(serializer.serialize_u16(*x)?); }
-            &ThrowContextValues::Int32(ref x) => { return Ok(serializer.serialize_i32(*x)?); }
-            &ThrowContextValues::Uint32(ref x) => { return Ok(serializer.serialize_u32(*x)?); }
-            &ThrowContextValues::Int64(ref x) => { return Ok(serializer.serialize_i64(*x)?); }
-            &ThrowContextValues::Uint64(ref x) => { return Ok(serializer.serialize_u64(*x)?); }
-            &ThrowContextValues::Float32(ref x) => { return Ok(serializer.serialize_f32(*x)?); }
-            &ThrowContextValues::Float64(ref x) => { return Ok(serializer.serialize_f64(*x)?); }
-            &ThrowContextValues::String(ref x) => { return Ok(serializer.serialize_str(x)?); }
-        };
-    }
-}
-
 
 impl fmt::Display for ThrowContextValues {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &ThrowContextValues::Bool(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Int8(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Uint8(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Int16(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Uint16(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Int32(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Uint32(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Int64(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Uint64(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Float32(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::Float64(ref x) => { write!(f, "{}", x) }
-            &ThrowContextValues::String(ref x) => { write!(f, "{}", x) }
+        match *self {
+            ThrowContextValues::Bool(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Int8(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Uint8(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Int16(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Uint16(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Int32(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Uint32(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Int64(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Uint64(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Float32(ref x) => write!(f, "{}", x),
+            ThrowContextValues::Float64(ref x) => write!(f, "{}", x),
+            ThrowContextValues::String(ref x) => write!(f, "{}", x),
+            ThrowContextValues::StaticStr(ref x) => write!(f, "{}", x),
         }
     }
 }
@@ -304,15 +293,9 @@ impl Into<ThrowContextValues> for f64 {
     }
 }
 
-impl<'a> Into<ThrowContextValues> for &'a str {
+impl<'a> Into<ThrowContextValues> for &'static str {
     fn into(self) -> ThrowContextValues {
-        ThrowContextValues::String(self.to_owned())
-    }
-}
-
-impl Into<ThrowContextValues> for String {
-    fn into(self) -> ThrowContextValues {
-        ThrowContextValues::String(self)
+        ThrowContextValues::StaticStr(self)
     }
 }
 
@@ -320,7 +303,8 @@ impl Into<ThrowContextValues> for String {
 pub type Result<T, E> = core::result::Result<T, Error<E>>;
 
 /// Represents a location at which an error was thrown via throw!()
-#[derive(Serialize, Debug)]
+#[derive(Debug)]
+#[cfg_attr(feature = "serde-1", derive(Serialize))]
 pub struct ErrorPoint {
     line: u32,
     column: u32,
@@ -372,21 +356,24 @@ impl ErrorPoint {
 
 
 /// represent a key-value pair
-#[derive(Serialize, Debug, Clone)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde-1", derive(Serialize))]
 pub struct KvPair {
     key: &'static str,
     value: ThrowContextValues,
 }
 
 impl KvPair {
+    /// Creates a new key value pair
     fn new(key: &'static str, value: ThrowContextValues) -> KvPair {
         KvPair { key, value }
     }
-    ///key
+
+    ///get key
     pub fn key(&self) -> &'static str {
         self.key
     }
-    ///value
+    ///get value
     pub fn value(&self) -> &ThrowContextValues {
         &self.value
     }
@@ -395,52 +382,27 @@ impl KvPair {
 
 /// Represents an error. Stores an original error of type E, and any number of ErrorPoints at
 /// which the error was propagated.
+
 pub struct Error<E> {
     points: Vec<ErrorPoint>,
     context: Vec<KvPair>,
     error: E,
 }
 
-struct VecErrorPoint<'a>(&'a [ErrorPoint]);
-
-impl<'a> Serialize for VecErrorPoint<'a>
-{
-    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
-        for e in self.0 {
-            seq.serialize_element(e)?;
-        }
-        seq.end()
-    }
-}
-
-struct VecKvPair<'a>(&'a [KvPair]);
-
-impl<'a> Serialize for VecKvPair<'a>
-{
-    fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
-        where S: Serializer
-    {
-        let mut seq = serializer.serialize_seq(Some(self.0.len()))?;
-        for e in self.0 {
-            seq.serialize_element(e)?;
-        }
-        seq.end()
-    }
-}
-
-
+#[cfg(feature = "serde-1")]
 impl<E: fmt::Display> Serialize for Error<E> {
     fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
-        where S: Serializer
+        where
+            S: Serializer,
     {
         let mut state = serializer.serialize_struct("Error", 3)?;
 
-        state.serialize_field("points", &VecErrorPoint(&self.points))?;
-        state.serialize_field("context", &VecKvPair(&self.context))?;
-        state.serialize_field::<&str>("error", &format!("{}", self.error).as_str())?;
+        state.serialize_field("points", &self.points)?;
+        state.serialize_field("context", &self.context)?;
+        state.serialize_field::<&str>(
+            "error",
+            &format!("{}", self.error).as_str(),
+        )?;
         state.end()
     }
 }
@@ -463,7 +425,7 @@ impl<E> Error<E> {
 
     /// For macro use only
     #[doc(hidden)]
-    pub fn __add_context<V: Into<ThrowContextValues>>(&mut self, key: &'static str, value: V) {
+    pub fn add_context<V: Into<ThrowContextValues>>(&mut self, key: &'static str, value: V) {
         self.context.push(KvPair::new(key, value.into()))
     }
 
@@ -594,14 +556,14 @@ macro_rules! up {
             },
         }
     );
-    ($e:expr, $($key:expr, $value:expr), *) => (
+    ($e:expr, $($key:expr => $value:expr),+) => (
         match $e {
             Ok(v) => v,
             Err(e) => {
                 // re-assignment for a better error message if up!() is used incorrectly
                 let mut me = __with_new_errorpoint!(e.transform());
                 $(
-                    me.__add_context($key, $value);
+                    me.add_context($key, $value);
                 )*
                 return Err(me);
             },
@@ -633,7 +595,7 @@ macro_rules! throw {
         }
     );
 
-     ($e:expr, $($key:expr, $value:expr), *) => ({
+     ($e:expr, $($key:expr => $value:expr),+) => ({
          match $e {
             Ok(v) => v,
             Err(e) => throw_new!(e, $($key, $value)*),
@@ -647,10 +609,10 @@ macro_rules! throw_new {
         return Err(__with_new_errorpoint!($crate::Error::new($e.into())));
     });
 
-  ($e:expr, $($key:expr, $value:expr), *) => ({
+  ($e:expr, $($key:expr => $value:expr),+) => ({
         let mut me = $crate::Error::new($e.into());
         $(
-            me.__add_context($key, $value);
+            me.add_context($key, $value);
         )*
         return Err(__with_new_errorpoint!(me));
 
