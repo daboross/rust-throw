@@ -175,7 +175,7 @@
 //!     possibly_fails("hello").unwrap()
 //! #   */
 //! #   let err = possibly_fails("hello").unwrap_err().to_string();
-//! #   assert!(err.includes("processing: hello"), "mangled error message: {}",  err);
+//! #   assert!(err.contains("processing: hello"), "mangled error message: {}",  err);
 //! }
 //! ```
 //!
