@@ -7,6 +7,8 @@ matrix:
     include:
     - rust: nightly
       script:
+      - cargo install --git https://github.com/starkat99/cargo-when.git
       - cargo test --verbose
       - cargo test --no-default-features --verbose
+      - cargo when --channel nightly test --features serde-1
       after_script: cargo bench --verbose
