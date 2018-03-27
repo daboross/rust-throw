@@ -171,11 +171,11 @@
 //! }
 //!
 //! fn main() {
-//! #   ///*
+//! #   /*
 //!     possibly_fails("hello").unwrap()
-//! #   //*/
-//! #   //let err = possibly_fails("hello").unwrap_err().to_string();
-//! #   //assert!(err.starts_with("Error: oops\n\tat "), "mangled error message: {}",  err);
+//! #   */
+//! #   let err = possibly_fails("hello").unwrap_err().to_string();
+//! #   assert!(err.includes("processing: hello"), "mangled error message: {}",  err);
 //! }
 //! ```
 //!
