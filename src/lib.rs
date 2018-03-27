@@ -168,13 +168,13 @@ use alloc::string::String;
 #[cfg(not(feature = "std"))]
 use alloc::borrow::ToOwned;
 
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 #[macro_use]
 extern crate serde_derive;
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 extern crate serde;
 
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 use serde::ser::{SerializeStruct, Serialize, Serializer};
 
 
@@ -185,8 +185,8 @@ pub struct StringExt(String);
 
 /// Types allowed to be value in the context vector
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde-1", derive(Serialize))]
-#[cfg_attr(feature = "serde-1", serde(untagged))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), serde(untagged))]
 pub enum ThrowContextValues {
     ///Boolean
     Bool(bool),
@@ -307,7 +307,7 @@ pub type Result<T, E> = core::result::Result<T, Error<E>>;
 
 /// Represents a location at which an error was thrown via throw!()
 #[derive(Debug)]
-#[cfg_attr(feature = "serde-1", derive(Serialize))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
 pub struct ErrorPoint {
     line: u32,
     column: u32,
@@ -360,7 +360,7 @@ impl ErrorPoint {
 
 /// represent a key-value pair
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde-1", derive(Serialize))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
 pub struct KvPair {
     key: &'static str,
     value: ThrowContextValues,
@@ -392,7 +392,7 @@ pub struct Error<E> {
     error: E,
 }
 
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 impl<E: fmt::Display> Serialize for Error<E> {
     fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
         where
