@@ -3,12 +3,19 @@ sudo: false
 rust:
 - stable
 - beta
+script:
+- cargo build --verbose
+- cargo test --verbose
+- cargo build --features "serde-1-std" --vebrose
+- cargo test --features "serde-1-std" --verbose
 matrix:
     include:
     - rust: nightly
       script:
-      - cargo install --git https://github.com/starkat99/cargo-when.git
+      - cargo build --verbose
       - cargo test --verbose
+      - cargo build --no-default-features --vebrose
       - cargo test --no-default-features --verbose
-      - cargo when --channel nightly test --features serde-1
+      - cargo build --no-default-features features "serde-1" --verbose
+      - cargo test --no-default-features --features "serde-1" --verbose
       after_script: cargo bench --verbose
