@@ -18,15 +18,15 @@ include = ["Cargo.toml", "src/**/*", "tests/**/*", "examples/**/*", "LICENSE", "
 [features]
 std = []
 unlimited-points = []
-serde-1 = []
+serde-1 = ["serde", "serde_derive"]
 default = ["std", "unlimited-points"]
 
 [badges]
 travis-ci = { repository = "daboross/rust-throw" }
 
 [dependencies]
-serde={version = "1.0", default-features = false, features= ["alloc"] }
-serde_derive = "1.0"
+serde={version = "1.0", default-features = false, features= ["alloc"], optional=true }
+serde_derive = {version = "1.0", optional=true }
 
 [dev-dependencies]
 regex = "0.2"

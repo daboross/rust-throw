@@ -168,10 +168,13 @@ use alloc::string::String;
 #[cfg(not(feature = "std"))]
 use alloc::borrow::ToOwned;
 
+#[cfg(feature = "serde-1")]
 #[macro_use]
 extern crate serde_derive;
+#[cfg(feature = "serde-1")]
 extern crate serde;
 
+#[cfg(feature = "serde-1")]
 use serde::ser::{SerializeStruct, Serialize, Serializer};
 
 
