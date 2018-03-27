@@ -177,12 +177,6 @@ extern crate serde;
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 use serde::ser::{SerializeStruct, Serialize, Serializer};
 
-
-/// extends alloc::String type and implements serde Serialize for it, when not_std flag is used
-#[cfg(not(feature = "std"))]
-pub struct StringExt(String);
-
-
 /// Types allowed to be value in the context vector
 #[derive(Debug, Clone)]
 #[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
