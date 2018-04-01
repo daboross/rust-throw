@@ -148,6 +148,52 @@
 //! [dependencies]
 //! throw = { version = "0.1", default-features = "false" }
 //! ```
+//!
+//! ---
+//!
+//! Key/value pairs
+//! ---
+//!
+//! Throw supports adding key/value pairs to errors to provide additional context information.
+//! In order to use this, simply add any number of `"key_name" => value,` arguments to any of
+//! the macros throw exports. `value` can be any integer type, float type, an `&'static str`,
+//! or an owned string.
+//!
+//! ```
+//! # #[macro_use]
+//! # extern crate throw;
+//! fn possibly_fails(process_this: &str) -> Result<(), throw::Error<&'static str>> {
+//!     if true {
+//!         throw_new!("oops", "processing" => process_this.to_owned());
+//!     }
+//!
+//!     Ok(())
+//! }
+//!
+//! fn main() {
+//! #   /*
+//!     possibly_fails("hello").unwrap()
+//! #   */
+//! #   let err = possibly_fails("hello").unwrap_err().to_string();
+//! #   assert!(err.contains("processing: hello"), "mangled error message: {}",  err);
+//! }
+//! ```
+//!
+//! Results in:
+//!
+//! ```text
+//! thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error: "oops"
+//!     processing: hello
+//!     at 6:9 in rust_out (src/lib.rs)', libcore/result.rs:945:5
+//! ```
+//!
+//! ---
+//!
+//! Serde support
+//! ---
+//!
+//! To have `serde::{Serialize, Deserialize}` implemented on Throw types, depend on throw with
+//! `features = ["serde-1-std"]` or `features = ["serde-1"]` for no-std environments.
 
 #[cfg(feature = "std")]
 mod core {
@@ -168,25 +214,19 @@ use alloc::string::String;
 #[cfg(not(feature = "std"))]
 use alloc::borrow::ToOwned;
 
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 #[macro_use]
 extern crate serde_derive;
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 extern crate serde;
 
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 use serde::ser::{SerializeStruct, Serialize, Serializer};
-
-
-/// extends alloc::String type and implements serde Serialize for it, when not_std flag is used
-#[cfg(not(feature = "std"))]
-pub struct StringExt(String);
-
 
 /// Types allowed to be value in the context vector
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde-1", derive(Serialize))]
-#[cfg_attr(feature = "serde-1", serde(untagged))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), serde(untagged))]
 pub enum ThrowContextValues {
     ///Boolean
     Bool(bool),
@@ -302,12 +342,18 @@ impl<'a> Into<ThrowContextValues> for &'static str {
     }
 }
 
+impl Into<ThrowContextValues> for String {
+    fn into(self) -> ThrowContextValues {
+        ThrowContextValues::String(self)
+    }
+}
+
 /// Result alias for a result containing a throw::Error.
 pub type Result<T, E> = core::result::Result<T, Error<E>>;
 
 /// Represents a location at which an error was thrown via throw!()
 #[derive(Debug)]
-#[cfg_attr(feature = "serde-1", derive(Serialize))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
 pub struct ErrorPoint {
     line: u32,
     column: u32,
@@ -360,7 +406,7 @@ impl ErrorPoint {
 
 /// represent a key-value pair
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde-1", derive(Serialize))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
 pub struct KvPair {
     key: &'static str,
     value: ThrowContextValues,
@@ -372,11 +418,12 @@ impl KvPair {
         KvPair { key, value }
     }
 
-    ///get key
+    /// Retrieve the key associated with this `KvPair`.
     pub fn key(&self) -> &'static str {
         self.key
     }
-    ///get value
+
+    /// Retrieve the value associated with this `KvPair`.
     pub fn value(&self) -> &ThrowContextValues {
         &self.value
     }
@@ -392,7 +439,7 @@ pub struct Error<E> {
     error: E,
 }
 
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 impl<E: fmt::Display> Serialize for Error<E> {
     fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
         where

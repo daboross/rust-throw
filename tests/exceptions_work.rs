@@ -87,7 +87,7 @@ fn test_static_message() {
 
 
 #[test]
-#[cfg(feature = "serde-1")]
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 fn serialize_json() {
     let error = throw_with_context3().unwrap_err();
     let json = serde_json::to_string(&error).unwrap();
