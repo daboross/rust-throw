@@ -16,6 +16,6 @@ matrix:
       - cargo test --verbose
       - cargo build --no-default-features --verbose
       - cargo test --no-default-features --verbose
-      - cargo build --no-default-features features "serde-1" --verbose
+      - cargo build --no-default-features --features "serde-1" --verbose
       - cargo test --no-default-features --features "serde-1" --verbose
       after_script: cargo bench --verbose
