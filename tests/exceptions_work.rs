@@ -36,7 +36,6 @@ fn throw3() -> Result<(), ()> {
     Ok(())
 }
 
-
 fn throw_with_context1() -> Result<(), &'static str> {
     throw_new!("Error with context", "code"=>78,"application"=>"rust_core")
 }
@@ -85,15 +84,13 @@ fn test_static_message() {
     assert_eq!("hi".to_owned(), error.into_origin());
 }
 
-
 #[test]
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 fn serialize_json() {
     let error = throw_with_context3().unwrap_err();
     let json = serde_json::to_string(&error).unwrap();
-    assert_eq!(r#"{"points":[{"line":41,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":45,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":50,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"}],"context":[{"key":"code","value":78},{"key":"application","value":"rust_core"},{"key":"project_secret","value":"omega"},{"key":"score","value":0.75},{"key":"height","value":948}],"error":"Error with context"}"#, json);
+    assert_eq!(r#"{"points":[{"line":40,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":44,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":49,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"}],"context":[{"key":"code","value":78},{"key":"application","value":"rust_core"},{"key":"project_secret","value":"omega"},{"key":"score","value":0.75},{"key":"height","value":948}],"error":"Error with context"}"#, json);
 }
-
 
 #[test]
 fn test_throw_with_context() {
@@ -116,7 +113,6 @@ fn test_throw_with_context() {
         format!("{:?}", error2)
     );
 }
-
 
 #[test]
 #[allow(deprecated)]

@@ -215,13 +215,13 @@ use alloc::string::String;
 use alloc::borrow::ToOwned;
 
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
+extern crate serde;
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 #[macro_use]
 extern crate serde_derive;
-#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
-extern crate serde;
 
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
-use serde::ser::{SerializeStruct, Serialize, Serializer};
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 /// Types allowed to be value in the context vector
 #[derive(Debug, Clone)]
@@ -361,7 +361,6 @@ pub struct ErrorPoint {
     file: &'static str,
 }
 
-
 impl ErrorPoint {
     /// The line throw!() occurred at, retrieved by line!()
     #[inline]
@@ -403,7 +402,6 @@ impl ErrorPoint {
     }
 }
 
-
 /// represent a key-value pair
 #[derive(Debug, Clone)]
 #[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
@@ -429,7 +427,6 @@ impl KvPair {
     }
 }
 
-
 /// Represents an error. Stores an original error of type E, and any number of ErrorPoints at
 /// which the error was propagated.
 
@@ -442,21 +439,17 @@ pub struct Error<E> {
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 impl<E: fmt::Display> Serialize for Error<E> {
     fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
-        where
-            S: Serializer,
+    where
+        S: Serializer,
     {
         let mut state = serializer.serialize_struct("Error", 3)?;
 
         state.serialize_field("points", &self.points)?;
         state.serialize_field("context", &self.context)?;
-        state.serialize_field::<&str>(
-            "error",
-            &format!("{}", self.error).as_str(),
-        )?;
+        state.serialize_field::<&str>("error", &format!("{}", self.error).as_str())?;
         state.end()
     }
 }
-
 
 impl<E> Error<E> {
     /// Creates a new Error with no ErrorPoints
@@ -515,8 +508,8 @@ impl<E> Error<E> {
     /// where the original error can transform into that type.
     #[inline]
     pub fn into_error<N>(self) -> N
-        where
-            E: Into<N>,
+    where
+        E: Into<N>,
     {
         self.error.into()
     }
@@ -524,8 +517,8 @@ impl<E> Error<E> {
     /// Transforms this Error<OldError> into Error<NewError>. This isn't implemented as an Into or
     /// From implementation because it would conflict with the blanket implementations in stdlib.
     pub fn transform<NE>(self) -> Error<NE>
-        where
-            E: Into<NE>,
+    where
+        E: Into<NE>,
     {
         Error {
             points: self.points,
@@ -536,19 +529,14 @@ impl<E> Error<E> {
 }
 
 impl<E> fmt::Display for Error<E>
-    where
-        E: fmt::Display,
+where
+    E: fmt::Display,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Error: {}", self.error));
 
         for kv in self.context.iter().rev() {
-            try!(write!(
-                fmt,
-                "\n\t{}: {}",
-                kv.key(),
-                kv.value(),
-            ));
+            try!(write!(fmt, "\n\t{}: {}", kv.key(), kv.value(),));
         }
 
         for point in self.points.iter().rev() {
@@ -567,18 +555,13 @@ impl<E> fmt::Display for Error<E>
 }
 
 impl<E> fmt::Debug for Error<E>
-    where
-        E: fmt::Debug,
+where
+    E: fmt::Debug,
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Error: {:?}", self.error));
         for kv in self.context.iter().rev() {
-            try!(write!(
-                fmt,
-                "\n\t{}: {}",
-                kv.key(),
-                kv.value(),
-            ));
+            try!(write!(fmt, "\n\t{}: {}", kv.key(), kv.value(),));
         }
         for point in self.points.iter().rev() {
             try!(write!(
