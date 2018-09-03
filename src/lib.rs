@@ -204,6 +204,7 @@ mod core {
 use core::fmt;
 
 #[cfg(not(feature = "std"))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), macro_use)]
 extern crate alloc;
 
 #[cfg(not(feature = "std"))]
