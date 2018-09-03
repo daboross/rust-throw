@@ -30,5 +30,5 @@ serde = { version = "1.0", default-features = false, optional=true }
 serde_derive = { version = "1.0", optional=true }
 
 [dev-dependencies]
-regex = "0.2"
+regex = "1.0"
 serde_json = "1.0"
