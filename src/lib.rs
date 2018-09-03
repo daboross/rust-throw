@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "std"), feature(core, alloc))]
+#![cfg_attr(not(feature = "std"), feature(alloc))]
 #![deny(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/throw/0.1.4")]
 //! Throw!
@@ -204,15 +204,12 @@ mod core {
 use core::fmt;
 
 #[cfg(not(feature = "std"))]
-#[macro_use]
 extern crate alloc;
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 #[cfg(not(feature = "std"))]
 use alloc::string::String;
-#[cfg(not(feature = "std"))]
-use alloc::borrow::ToOwned;
 
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 extern crate serde;
