@@ -77,6 +77,17 @@ fn throws_into_key_value() -> Result<(), String> {
     Ok(())
 }
 
+fn throws_into_multiple_key_value_pairs() -> Result<(), String> {
+    throw!(
+        Err("some static string"),
+        "key" => "value",
+        "key2" => "value2",
+        "key3" => "value3",
+        "key4" => "value4",
+    );
+    Ok(())
+}
+
 #[test]
 fn test_static_message() {
     let error = throw_static_message().unwrap_err();
@@ -165,6 +176,20 @@ fn test_throws_into_key_value() {
     let error = throws_into_key_value().unwrap_err();
     assert_matches!(
         r#"Error: some static string
+    key: value
+    at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#,
+        error
+    )
+}
+
+#[test]
+fn test_throws_into_multiple_key_value_pairs() {
+    let error = throws_into_multiple_key_value_pairs().unwrap_err();
+    assert_matches!(
+        r#"Error: some static string
+    key4: value4
+    key3: value3
+    key2: value2
     key: value
     at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#,
         error
