@@ -626,7 +626,7 @@ macro_rules! throw {
         }
     );
 
-     ($e:expr, $($key:expr => $value:expr),+) => ({
+     ($e:expr, $($key:expr => $value:expr),+ $(,)*) => ({
          match $e {
             Ok(v) => v,
             Err(e) => throw_new!(e, $($key => $value,)*),
@@ -640,7 +640,7 @@ macro_rules! throw_new {
         return Err(__with_new_errorpoint!($crate::Error::new($e.into())));
     });
 
-  ($e:expr, $($key:expr => $value:expr),+) => ({
+  ($e:expr, $($key:expr => $value:expr),+ $(,)*) => ({
         let mut me = $crate::Error::new($e.into());
         $(
             me.add_context($key, $value);
