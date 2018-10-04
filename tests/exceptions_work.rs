@@ -72,6 +72,11 @@ fn throws_into() -> Result<(), String> {
     Ok(())
 }
 
+fn throws_into_key_value() -> Result<(), String> {
+    throw!(Err("some static string"), "key" => "value");
+    Ok(())
+}
+
 #[test]
 fn test_static_message() {
     let error = throw_static_message().unwrap_err();
@@ -150,6 +155,17 @@ fn test_throws_into() {
     let error = throws_into().unwrap_err();
     assert_matches!(
         r#"Error: some static string
+    at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#,
+        error
+    )
+}
+
+#[test]
+fn test_throws_into_key_value() {
+    let error = throws_into_key_value().unwrap_err();
+    assert_matches!(
+        r#"Error: some static string
+    key: value
     at [0-9]+:[0-9] in exceptions_work \([a-z/._-]+\)"#,
         error
     )
