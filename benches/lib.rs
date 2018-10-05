@@ -1,13 +1,12 @@
 #![feature(test)]
-
 extern crate test;
-
 #[macro_use]
 extern crate throw;
 
+use std::result::Result as StdResult;
+
 use test::Bencher;
 use throw::Result;
-use std::result::Result as StdResult;
 
 #[inline(never)]
 fn gives_throw_ok() -> Result<&'static str, &'static str> {

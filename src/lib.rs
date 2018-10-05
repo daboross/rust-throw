@@ -195,6 +195,16 @@
 //! To have `serde::{Serialize, Deserialize}` implemented on Throw types, depend on throw with
 //! `features = ["serde-1-std"]` or `features = ["serde-1"]` for no-std environments.
 
+#[cfg(not(feature = "std"))]
+#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), macro_use)]
+extern crate alloc;
+
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
+extern crate serde;
+#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
+#[macro_use]
+extern crate serde_derive;
+
 #[cfg(feature = "std")]
 mod core {
     pub use std::fmt;
@@ -204,27 +214,23 @@ mod core {
 use core::fmt;
 
 #[cfg(not(feature = "std"))]
-#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), macro_use)]
-extern crate alloc;
-
+use alloc::string::String;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-#[cfg(not(feature = "std"))]
-use alloc::string::String;
-
-#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
-extern crate serde;
-#[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
-#[macro_use]
-extern crate serde_derive;
 
 #[cfg(any(feature = "serde-1", feature = "serde-1-std"))]
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 /// Types allowed to be value in the context vector
 #[derive(Debug, Clone)]
-#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
-#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), serde(untagged))]
+#[cfg_attr(
+    any(feature = "serde-1", feature = "serde-1-std"),
+    derive(Serialize)
+)]
+#[cfg_attr(
+    any(feature = "serde-1", feature = "serde-1-std"),
+    serde(untagged)
+)]
 pub enum ThrowContextValues {
     ///Boolean
     Bool(bool),
@@ -351,7 +357,10 @@ pub type Result<T, E> = core::result::Result<T, Error<E>>;
 
 /// Represents a location at which an error was thrown via throw!()
 #[derive(Debug)]
-#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
+#[cfg_attr(
+    any(feature = "serde-1", feature = "serde-1-std"),
+    derive(Serialize)
+)]
 pub struct ErrorPoint {
     line: u32,
     column: u32,
@@ -402,7 +411,10 @@ impl ErrorPoint {
 
 /// represent a key-value pair
 #[derive(Debug, Clone)]
-#[cfg_attr(any(feature = "serde-1", feature = "serde-1-std"), derive(Serialize))]
+#[cfg_attr(
+    any(feature = "serde-1", feature = "serde-1-std"),
+    derive(Serialize)
+)]
 pub struct KvPair {
     key: &'static str,
     value: ThrowContextValues,
@@ -599,13 +611,13 @@ macro_rules! up {
                 return Err(me);
             },
         }
-    )
+    );
 }
 
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __with_new_errorpoint {
-    ($e:expr) => ({
+    ($e:expr) => {{
         let mut e = $e;
         e.__push_point($crate::ErrorPoint::__construct(
             line!(),
@@ -614,7 +626,7 @@ macro_rules! __with_new_errorpoint {
             file!(),
         ));
         e
-    })
+    }};
 }
 
 #[macro_export]
@@ -625,27 +637,24 @@ macro_rules! throw {
             Err(e) => throw_new!(e),
         }
     );
-
-     ($e:expr, $($key:expr => $value:expr),+ $(,)*) => ({
+    ($e:expr, $($key:expr => $value:expr),+ $(,)*) => ({
          match $e {
             Ok(v) => v,
             Err(e) => throw_new!(e, $($key => $value,)*),
         }
-    })
+    });
 }
 
 #[macro_export]
 macro_rules! throw_new {
-  ($e:expr) => ({
+    ($e:expr) => ({
         return Err(__with_new_errorpoint!($crate::Error::new($e.into())));
     });
-
-  ($e:expr, $($key:expr => $value:expr),+ $(,)*) => ({
+    ($e:expr, $($key:expr => $value:expr),+ $(,)*) => ({
         let mut me = $crate::Error::new($e.into());
         $(
             me.add_context($key, $value);
         )*
         return Err(__with_new_errorpoint!(me));
-
-    })
+    });
 }

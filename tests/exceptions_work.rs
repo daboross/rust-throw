@@ -7,15 +7,20 @@ extern crate throw;
 use throw::Result;
 
 macro_rules! assert_matches {
-    ($expected:expr, $actual:expr) => ({
+    ($expected:expr, $actual:expr) => {{
         let expected = ($expected).replace("    ", "\t");
         let re = regex::Regex::new(&expected).expect("expected hardcoded regex to compile");
 
         let actual = format!("{}", $actual);
 
-        assert!(re.is_match(&actual),
-            format!("expected error to match regex `\n{}\n`, but found `\n{}\n`", expected, actual));
-    })
+        assert!(
+            re.is_match(&actual),
+            format!(
+                "expected error to match regex `\n{}\n`, but found `\n{}\n`",
+                expected, actual
+            )
+        );
+    }};
 }
 
 fn throw_static_message() -> Result<(), &'static str> {
