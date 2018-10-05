@@ -3,6 +3,7 @@ sudo: false
 rust:
 - stable
 - beta
+- 1.20.0
 script:
 - cargo build --verbose
 - cargo test --verbose
