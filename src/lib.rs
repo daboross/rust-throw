@@ -588,6 +588,12 @@ where
     }
 }
 
+impl<E> std::error::Error for Error<E>
+where
+    E: fmt::Display + fmt::Debug
+{
+}
+
 #[macro_export]
 macro_rules! up {
     ($e:expr) => (
