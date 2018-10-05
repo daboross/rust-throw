@@ -110,7 +110,26 @@ fn test_static_message() {
 fn serialize_json() {
     let error = throw_with_context3().unwrap_err();
     let json = serde_json::to_string(&error).unwrap();
-    assert_eq!(r#"{"points":[{"line":45,"column":4,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":49,"column":4,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":54,"column":4,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"}],"context":[{"key":"code","value":78},{"key":"application","value":"rust_core"},{"key":"project_secret","value":"omega"},{"key":"score","value":0.75},{"key":"height","value":948}],"error":"Error with context"}"#, json);
+    let whitespace_trim = regex::Regex::new("\\s+").unwrap();
+    let expected = r#"\{
+        "points":\[
+            \{"line":[0-9]+,"column":[0-9]+,"module_path":"exceptions_work",
+                "file":"tests/exceptions_work.rs"\},
+            \{"line":[0-9]+,"column":[0-9]+,"module_path":"exceptions_work",
+                "file":"tests/exceptions_work.rs"\},
+            \{"line":[0-9]+,"column":[0-9]+,"module_path":"exceptions_work",
+                "file":"tests/exceptions_work.rs"\}
+        \],
+        "context":\[
+            \{"key":"code","value":78\},
+            \{"key":"application","value":"rust_core"\},
+            \{"key":"project_secret","value":"omega"\},
+            \{"key":"score","value":0.75\},
+            \{"key":"height","value":948\}
+        \],
+        "error":"Error with context"
+    \}"#;
+    assert_matches!(whitespace_trim.replace_all(expected, "\\s*"), json);
 }
 
 #[test]
