@@ -232,31 +232,31 @@ use serde::ser::{Serialize, SerializeStruct, Serializer};
     serde(untagged)
 )]
 pub enum ThrowContextValues {
-    ///Boolean
+    /// Boolean context value
     Bool(bool),
-    ///Int8
+    /// 8-bit signed context value
     Int8(i8),
-    ///Uint8
+    /// 8-bit unsigned context value
     Uint8(u8),
-    ///Int16
+    /// 16-bit signed context value
     Int16(i16),
-    ///Uint16
+    /// 16-bit unsigned context value
     Uint16(u16),
-    ///Int32
+    /// 32-bit signed context value
     Int32(i32),
-    ///Uint32
+    /// 32-bit unsigned context value
     Uint32(u32),
-    ///Int64
+    /// 64-bit signed context value
     Int64(i64),
-    ///Uint64
+    /// 64-bit unsigned context value
     Uint64(u64),
-    ///Float32
+    /// 32-bit floating point context value
     Float32(f32),
-    ///Float64
+    /// 64-bit floating point context value
     Float64(f64),
-    ///String
+    /// Allocated string context value
     String(String),
-    ///Static String
+    /// Static / program inline string context value
     StaticStr(&'static str),
 }
 
