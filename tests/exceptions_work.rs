@@ -110,7 +110,7 @@ fn test_static_message() {
 fn serialize_json() {
     let error = throw_with_context3().unwrap_err();
     let json = serde_json::to_string(&error).unwrap();
-    assert_eq!(r#"{"points":[{"line":40,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":44,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":49,"column":5,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"}],"context":[{"key":"code","value":78},{"key":"application","value":"rust_core"},{"key":"project_secret","value":"omega"},{"key":"score","value":0.75},{"key":"height","value":948}],"error":"Error with context"}"#, json);
+    assert_eq!(r#"{"points":[{"line":45,"column":4,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":49,"column":4,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"},{"line":54,"column":4,"module_path":"exceptions_work","file":"tests/exceptions_work.rs"}],"context":[{"key":"code","value":78},{"key":"application","value":"rust_core"},{"key":"project_secret","value":"omega"},{"key":"score","value":0.75},{"key":"height","value":948}],"error":"Error with context"}"#, json);
 }
 
 #[test]
