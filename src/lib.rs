@@ -590,8 +590,15 @@ where
 
 impl<E> std::error::Error for Error<E>
 where
-    E: fmt::Display + fmt::Debug
+    E: std::error::Error
 {
+    fn description(&self) -> &str {
+        self.error().description()
+    }
+
+    fn cause(&self) -> Option<&std::error::Error> {
+        Some(self.error())
+    }
 }
 
 #[macro_export]
